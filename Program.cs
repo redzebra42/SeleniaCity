@@ -123,23 +123,23 @@ class Player
             }
 
             int numNewBuildings = 2;
-            Building[] buildings = new Building[numNewBuildings];
+            Dictionary<int,Building> buildings = [];
             for (int i = 0; i < numNewBuildings; i++)
             {
                 string buildingProperties = "2 3 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
-                buildings[i] = ToBuilding(buildingProperties);
+                Building building = ToBuilding(buildingProperties);
+                currentState.buildings[building.id] = building;
             }
 
             currentState.resources += resources;
-            currentState.AddNewBuildings(numNewBuildings, buildings);
-
+            currentState.pods = pods;
+            currentState.travelRoutes = travelRoutes;
 
             // Write an action using Console.WriteLine()
             // To debug: Console.Error.WriteLine("Debug messages...");
 
 
             Console.WriteLine("TUBE 0 1;TUBE 0 2;POD 42 0 1 0 2 0 1 0 2"); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
-
         }
     }
 }
@@ -168,12 +168,28 @@ public struct TravelRoute
     public int buildingId1, buildingId2, capacity;
 }
 
+public struct Coord(int X, int Y)
+{
+    public int X = X;
+    public int Y = Y;
+}
+
+public class Line(Coord coord1, Coord coord2)
+{
+    public Coord coord1 = coord1;
+    public Coord coord2 = coord2;
+    public bool IntersectsWith(Line line)
+    {
+
+    }
+}
+
 public class GameState
 {
     public int points, resources;
     public int numBuildings, numPods, numTravelRoutes;
     public GameDate date;
-    public Building[] buildings;
+    public Dictionary<int,Building> buildings;
     public Pod[] pods;
     public TravelRoute[] travelRoutes;
     public GameState(int numBuildings, int numPods, int numTravelRoutes)
@@ -186,16 +202,20 @@ public class GameState
         date.day = 0;
         date.month = 0;
         this.date = date;
-        buildings = new Building[numBuildings];
+        buildings = [];
         pods = new Pod[numPods];
         travelRoutes = new TravelRoute[numTravelRoutes];
         
     }
-    public void AddNewBuildings(int numNewBuildings, Building[] buildings)
+
+    public bool CanConstruct(int x1, int y1, int x2, int y2)
     {
-        Building[] newBuildings = new Building[this.buildings.Length + numNewBuildings];
-        buildings.CopyTo(newBuildings, 0);
-        this.buildings.CopyTo(newBuildings, numNewBuildings);
-        this.buildings = newBuildings;
+        foreach (TravelRoute travelRoute in this.travelRoutes)
+        {
+            Coord coord1 = new Coord(x1, y1);
+            Coord coord2 = new Coord(x2, y2);
+            if IntersectsWith()
+        }
+        return true;
     }
 }
