@@ -1,0 +1,14 @@
+e:\tristan\git\SeleniaCity\bin\Debug\net8.0\SeleniaCity.exe
+E:\tristan\git\SeleniaCity\bin\Debug\net8.0\SeleniaCity.deps.json
+E:\tristan\git\SeleniaCity\bin\Debug\net8.0\SeleniaCity.runtimeconfig.json
+e:\tristan\git\SeleniaCity\bin\Debug\net8.0\SeleniaCity.dll
+e:\tristan\git\SeleniaCity\bin\Debug\net8.0\SeleniaCity.pdb
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.GeneratedMSBuildEditorConfig.editorconfig
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.AssemblyInfoInputs.cache
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.AssemblyInfo.cs
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.csproj.CoreCompileInputs.cache
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.dll
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\refint\SeleniaCity.dll
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.pdb
+E:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.genruntimeconfig.cache
+E:\tristan\git\SeleniaCity\obj\Debug\net8.0\ref\SeleniaCity.dll
