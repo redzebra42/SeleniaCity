@@ -113,7 +113,7 @@ class Player
                 travelRoute.buildingId1 = buildingId1;
                 travelRoute.buildingId2 = buildingId2;
             }
-            
+
             int numPods = 1;
             Pod[] pods = new Pod[numPods];
             for (int i = 0; i < numPods; i++)
@@ -123,19 +123,15 @@ class Player
             }
 
             int numNewBuildings = 2;
-            Building[] buildings = new Building[numNewBuildings + currentState.numBuildings];
+            Building[] buildings = new Building[numNewBuildings];
             for (int i = 0; i < numNewBuildings; i++)
             {
                 string buildingProperties = "2 3 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
                 buildings[i] = ToBuilding(buildingProperties);
             }
-            
+
             currentState.resources += resources;
-            TravelRoute[] newTravelRoutes = new TravelRoute[currentState.travelRoutes.Length + travelRoutes.Length];
-            travelRoutes.CopyTo(newTravelRoutes, 0);
-            currentState.travelRoutes.CopyTo(newTravelRoutes, travelRoutes.Length);
-            currentState.travelRoutes = newTravelRoutes;
-            Pod[] newPods = new Pod[currentState.numPods + pods.Length];
+            currentState.AddNewBuildings(numNewBuildings, buildings);
 
 
             // Write an action using Console.WriteLine()
@@ -193,5 +189,13 @@ public class GameState
         buildings = new Building[numBuildings];
         pods = new Pod[numPods];
         travelRoutes = new TravelRoute[numTravelRoutes];
+        
+    }
+    public void AddNewBuildings(int numNewBuildings, Building[] buildings)
+    {
+        Building[] newBuildings = new Building[this.buildings.Length + numNewBuildings];
+        buildings.CopyTo(newBuildings, 0);
+        this.buildings.CopyTo(newBuildings, numNewBuildings);
+        this.buildings = newBuildings;
     }
 }
