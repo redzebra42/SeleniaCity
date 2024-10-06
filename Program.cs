@@ -12,6 +12,9 @@ using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Linq.Expressions;
+using System.Data;
+using System.Security.Cryptography.X509Certificates;
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -180,7 +183,8 @@ public class Line(Coord coord1, Coord coord2)
     public Coord coord2 = coord2;
     public bool IntersectsWith(Line line)
     {
-
+        //TODO figure that out...
+        return false;
     }
 }
 
@@ -212,10 +216,45 @@ public class GameState
     {
         foreach (TravelRoute travelRoute in this.travelRoutes)
         {
-            Coord coord1 = new Coord(x1, y1);
-            Coord coord2 = new Coord(x2, y2);
-            if IntersectsWith()
+            Coord coord1 = new(x1, y1);
+            Coord coord2 = new(x2, y2);
+            Coord coord3 = new(this.buildings[travelRoute.buildingId1].X, this.buildings[travelRoute.buildingId1].Y);
+            Coord coord4 = new(this.buildings[travelRoute.buildingId2].X, this.buildings[travelRoute.buildingId2].Y);
+            Line line1 = new(coord1, coord2);
+            Line line2 = new(coord3, coord4);
+            if (line1.IntersectsWith(line2))
+            {
+                return false;
+            }
         }
         return true;
+    }
+
+    public void DistanceSort(List<int> buildingIds, int fromBuildingId)
+    {
+        int _Distance(int buildingId1, int buildingId2)
+        {
+            int dist1 = Math.Abs(this.buildings[fromBuildingId].X - this.buildings[buildingId1].X) + Math.Abs(this.buildings[fromBuildingId].Y - this.buildings[buildingId1].Y);
+            int dist2 = Math.Abs(this.buildings[fromBuildingId].X - this.buildings[buildingId2].X) + Math.Abs(this.buildings[fromBuildingId].Y - this.buildings[buildingId2].Y);
+            return dist1 - dist2;
+        }
+        buildingIds.Sort(_Distance);
+    }
+
+    public Coord[] TubePath(int astronautType, int fromBuildingId)
+    {
+        List<int> rightTypeBuildingIds = [];
+        foreach (int toBuildingId in this.buildings.Keys)
+        {
+            if (this.buildings[toBuildingId].type == astronautType)
+            {
+                rightTypeBuildingIds.Add(toBuildingId);
+            }
+        }
+        this.DistanceSort(rightTypeBuildingIds, fromBuildingId);
+        foreach (int toBuildingId in rightTypeBuildingIds)
+        {
+            //TODO finish the function...
+        }
     }
 }
