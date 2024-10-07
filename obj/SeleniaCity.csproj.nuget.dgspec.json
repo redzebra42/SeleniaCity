@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/tristan/C#/SeleniaCity/SeleniaCity/SeleniaCity.csproj": {}
+    "E:\\tristan\\git\\SeleniaCity\\SeleniaCity.csproj": {}
   },
   "projects": {
-    "/home/tristan/C#/SeleniaCity/SeleniaCity/SeleniaCity.csproj": {
+    "E:\\tristan\\git\\SeleniaCity\\SeleniaCity.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/tristan/C#/SeleniaCity/SeleniaCity/SeleniaCity.csproj",
+        "projectUniqueName": "E:\\tristan\\git\\SeleniaCity\\SeleniaCity.csproj",
         "projectName": "SeleniaCity",
-        "projectPath": "/home/tristan/C#/SeleniaCity/SeleniaCity/SeleniaCity.csproj",
-        "packagesPath": "/home/tristan/.nuget/packages/",
-        "outputPath": "/home/tristan/C#/SeleniaCity/SeleniaCity/obj/",
+        "projectPath": "E:\\tristan\\git\\SeleniaCity\\SeleniaCity.csproj",
+        "packagesPath": "C:\\Users\\Tristan\\.nuget\\packages\\",
+        "outputPath": "E:\\tristan\\git\\SeleniaCity\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/tristan/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Tristan\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -58,7 +58,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

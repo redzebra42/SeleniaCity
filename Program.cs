@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using System.Data;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
+using System.ComponentModel.DataAnnotations;
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -180,6 +181,12 @@ public struct Coord(int X, int Y)
     public int Y = Y;
 }
 
+public struct Pair<T>(T X, T Y)
+{
+    public T X = X;
+    public T Y = Y;
+}
+
 public class Line(Coord coord1, Coord coord2)
 {
     public Coord coord1 = coord1;
@@ -243,6 +250,12 @@ public class GameState
             return dist1 - dist2;
         }
         buildingIds.Sort(_Distance);
+    }
+
+    public int Distance(int buildingId1, int buildingId2)
+    {
+        return (int)Math.Floor(Math.Pow(Math.Sqrt(this.buildings[buildingId1].X - this.buildings[buildingId2].X) 
+                                      + Math.Sqrt(this.buildings[buildingId1].Y - this.buildings[buildingId2].Y), 2));
     }
 
     public int GraphDistance(int buildingId1, int buildingId2, List<int> alreadyVisited)
@@ -349,4 +362,31 @@ public class GameState
         return destinationId;
     }
 
+    public List<Pair<int>> NewTubes(List<int> NewBuildingIds)
+    {
+        List<Pair<int>> newTubes = [];
+        foreach (int newBuildingId in NewBuildingIds)
+        {
+            foreach (int astronautType in this.buildings[newBuildingId].astronauts.Keys)
+            {
+                newTubes.Add(new Pair<int>(newBuildingId, DestinationForAstronaut(astronautType, newBuildingId)));
+            }
+        }
+        return newTubes;
+    }
+
+    public string ContrucTubes(List<Pair<int>> tubes)
+    {
+        string res = "TUBE ";
+        foreach (Pair<int> tubeIds in tubes)
+        {
+            res += tubeIds.X + " " + tubeIds.Y;
+            this.routeGraph[tubeIds.X].Add(tubeIds.Y);
+            this.routeGraph[tubeIds.Y].Add(tubeIds.X);
+            this.resources -= Distance(tubeIds.X, tubeIds.Y);
+        }
+        return res;
+    }
+
+    
 }
