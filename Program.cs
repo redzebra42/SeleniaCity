@@ -111,6 +111,8 @@ class Player
                 int buildingId1 = 0;
                 int buildingId2 = 1;
                 int capacity = 3;
+                currentState.routeGraph[buildingId1].Add(buildingId2);
+                currentState.routeGraph[buildingId2].Add(buildingId1);
                 TravelRoute travelRoute;
                 travelRoute.capacity = capacity;
                 travelRoute.buildingId1 = buildingId1;
@@ -196,12 +198,14 @@ public class GameState
     public Dictionary<int,Building> buildings;
     public Pod[] pods;
     public TravelRoute[] travelRoutes;
+    public Dictionary<int,List<int>> routeGraph;
     public GameState(int numBuildings, int numPods, int numTravelRoutes)
     {
         points = 0;
         this.numBuildings = numBuildings;
         this.numPods = numPods;
         this.numTravelRoutes = numTravelRoutes;
+        this.routeGraph = [];
         GameDate date;
         date.day = 0;
         date.month = 0;
@@ -209,7 +213,6 @@ public class GameState
         buildings = [];
         pods = new Pod[numPods];
         travelRoutes = new TravelRoute[numTravelRoutes];
-        
     }
 
     public bool CanConstruct(int x1, int y1, int x2, int y2)
@@ -241,9 +244,43 @@ public class GameState
         buildingIds.Sort(_Distance);
     }
 
-    public Coord[] TubePath(int astronautType, int fromBuildingId)
+    public int GraphDistance(int buildingId1, int buildingId2, List<int> alreadyVisited)
+    {
+        int _GraphDistance(int fromBuildingId, int toBuildingId)
+        {
+            //TODO make the distance 0 for teleporters
+            alreadyVisited.Add(fromBuildingId);
+            if (fromBuildingId == toBuildingId)
+            {
+                return 0;
+            }
+            else
+            {
+                List<int> toVisit = [];
+                foreach (int buildingId in this.routeGraph[fromBuildingId])
+                {
+                    if (!alreadyVisited.Contains(buildingId))
+                    {
+                        toVisit.Add(buildingId);
+                    }
+                }
+                if (toVisit.Count == 0)
+                {
+                    return 10000;
+                }
+                else
+                {
+                    return toVisit.Select(x => 1 + _GraphDistance(x, toBuildingId)).Min();
+                }
+            }
+        }
+        return _GraphDistance(buildingId1, buildingId2);
+    }
+
+    public List<int> TubePath(int astronautType, int fromBuildingId)
     {
         List<int> rightTypeBuildingIds = [];
+        List<int> path = [fromBuildingId];
         foreach (int toBuildingId in this.buildings.Keys)
         {
             if (this.buildings[toBuildingId].type == astronautType)
@@ -254,7 +291,16 @@ public class GameState
         this.DistanceSort(rightTypeBuildingIds, fromBuildingId);
         foreach (int toBuildingId in rightTypeBuildingIds)
         {
-            //TODO finish the function...
+            if (CanConstruct(buildings[fromBuildingId].X, buildings[fromBuildingId].Y, buildings[toBuildingId].X, buildings[toBuildingId].Y))
+            {
+                path.Add(toBuildingId);
+                break;
+            }
         }
+        if (path.Count < 2)
+        {
+            //add the neighbours with the minimum distance from toBuildingId to path and continue...
+        }
+        return path;
     }
 }
