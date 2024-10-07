@@ -363,14 +363,17 @@ public class GameState
         return destinationId;
     }
 
-    public List<Pair<int>> NewTubes(List<int> NewBuildingIds)
+    public List<Pair<int>> NewTubes(List<int> NewBuildingIds) // Modifies the routeGraph with the new tubes
     {
         List<Pair<int>> newTubes = [];
         foreach (int newBuildingId in NewBuildingIds)
         {
             foreach (int astronautType in this.buildings[newBuildingId].astronauts.Keys)
             {
-                newTubes.Add(new Pair<int>(newBuildingId, DestinationForAstronaut(astronautType, newBuildingId)));
+                Pair<int> newTube = new(newBuildingId, DestinationForAstronaut(astronautType, newBuildingId));
+                newTubes.Add(newTube);
+                this.routeGraph[newTube.X].Add(newTube.Y);
+                this.routeGraph[newTube.Y].Add(newTube.X);
             }
         }
         return newTubes;
@@ -384,8 +387,6 @@ public class GameState
         foreach (Pair<int> tubeIds in tubes)
         {
             tubeString = "TUBE " + tubeIds.X + ' '+ tubeIds.Y + ';';
-            this.routeGraph[tubeIds.X].Add(tubeIds.Y);
-            this.routeGraph[tubeIds.Y].Add(tubeIds.X);
             this.resources -= Distance(tubeIds.X, tubeIds.Y);
             podString = "POD " + this.numPods++ + ' ' + tubeIds.X + ' '+ tubeIds.Y + ';'; //TODO construct a pod continuing in a longer path
             this.resources -= 1000;
@@ -393,6 +394,4 @@ public class GameState
         res += tubeString + podString;
         return res;
     }
-
-    
 }
