@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Linq.Expressions;
 using System.Data;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -246,6 +247,7 @@ public class GameState
 
     public int GraphDistance(int buildingId1, int buildingId2, List<int> alreadyVisited)
     {
+        bool foundOne = false;
         int _GraphDistance(int fromBuildingId, int toBuildingId)
         {
             //TODO make the distance 0 for teleporters
@@ -262,25 +264,56 @@ public class GameState
                     if (!alreadyVisited.Contains(buildingId))
                     {
                         toVisit.Add(buildingId);
+                        foundOne = true;
                     }
                 }
-                if (toVisit.Count == 0)
+                if (toVisit.Count == 0 || foundOne)
                 {
                     return 10000;
                 }
                 else
                 {
-                    return toVisit.Select(x => 1 + _GraphDistance(x, toBuildingId)).Min();
+                    if (buildings[fromBuildingId].type == 0)
+                    {
+                        return toVisit.Select(x => _GraphDistance(x, toBuildingId)).Min();
+                    }
+                    else
+                    {
+                        return toVisit.Select(x => 1 + _GraphDistance(x, toBuildingId)).Min();
+                    }
                 }
             }
         }
         return _GraphDistance(buildingId1, buildingId2);
     }
 
-    public List<int> TubePath(int astronautType, int fromBuildingId)
+    public bool InConnexGraph(int fromBuildingId, int toBuildingId)
+    {
+        bool res = false;
+        bool _InConnexGraph(int fromBuildingId, int toBuildingId)
+        {
+            List<bool> resList = [];
+            if (!res && fromBuildingId != toBuildingId)
+            {
+                foreach (int buildingId in this.routeGraph[fromBuildingId])
+                {
+                    resList.Add(_InConnexGraph(fromBuildingId, toBuildingId));
+                }
+                return resList.Contains(true);
+            }
+            else
+            {
+                res = true;
+                return true;
+            }
+        }
+        return _InConnexGraph(fromBuildingId, toBuildingId);
+    }
+
+    public int DestinationForAstronaut(int astronautType, int fromBuildingId)
     {
         List<int> rightTypeBuildingIds = [];
-        List<int> path = [fromBuildingId];
+        int destinationId = -1;
         foreach (int toBuildingId in this.buildings.Keys)
         {
             if (this.buildings[toBuildingId].type == astronautType)
@@ -288,19 +321,32 @@ public class GameState
                 rightTypeBuildingIds.Add(toBuildingId);
             }
         }
-        this.DistanceSort(rightTypeBuildingIds, fromBuildingId);
+        //this.DistanceSort(rightTypeBuildingIds, fromBuildingId);
         foreach (int toBuildingId in rightTypeBuildingIds)
         {
             if (CanConstruct(buildings[fromBuildingId].X, buildings[fromBuildingId].Y, buildings[toBuildingId].X, buildings[toBuildingId].Y))
             {
-                path.Add(toBuildingId);
+                destinationId = toBuildingId;
                 break;
             }
         }
-        if (path.Count < 2)
+        if (destinationId == -1)
         {
-            //add the neighbours with the minimum distance from toBuildingId to path and continue...
+            foreach (int toBuildingId in this.buildings.Keys)
+            {
+                if (CanConstruct(buildings[fromBuildingId].X, buildings[fromBuildingId].Y, buildings[toBuildingId].X, buildings[toBuildingId].Y))
+                {
+                    foreach (int toRightTypeBuildingId in rightTypeBuildingIds)
+                    {
+                        if (InConnexGraph(toRightTypeBuildingId, toBuildingId))
+                        {
+                            destinationId = toBuildingId;
+                        }
+                    }
+                }
+            }
         }
-        return path;
+        return destinationId;
     }
+
 }
