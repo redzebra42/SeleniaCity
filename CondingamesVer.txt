@@ -1,0 +1,60 @@
+
+        while (true)
+        {
+            currentState.routeGraph = [];
+            int resources = int.Parse(Console.ReadLine());
+            int numTravelRoutes = int.Parse(Console.ReadLine());
+            currentState.numTravelRoutes = numTravelRoutes;
+            TravelRoute[] travelRoutes = new TravelRoute[numTravelRoutes];
+            for (int i = 0; i < numTravelRoutes; i++)
+            {
+                string[] inputs = Console.ReadLine().Split(' ');
+                int buildingId1 = int.Parse(inputs[0]);
+                int buildingId2 = int.Parse(inputs[1]);
+                int capacity = int.Parse(inputs[2]);
+                currentState.routeGraph[buildingId1].Add(buildingId2);
+                currentState.routeGraph[buildingId2].Add(buildingId1);
+                TravelRoute travelRoute;
+                travelRoute.capacity = capacity;
+                travelRoute.buildingId1 = buildingId1;
+                travelRoute.buildingId2 = buildingId2;
+            }
+
+            int numPods = int.Parse(Console.ReadLine());
+            currentState.numPods = numPods;
+            Pod[] pods = new Pod[numPods];
+            for (int i = 0; i < numPods; i++)
+            {
+                string podProperties = Console.ReadLine(); // podId numStops stop1 stop2 ...
+                pods[i] = ToPod(podProperties);
+            }
+
+            int numNewBuildings = int.Parse(Console.ReadLine());
+            currentState.numBuildings += numNewBuildings;
+            List<int> newBuildingIds = [];
+            for (int i = 0; i < numNewBuildings; i++)
+            {
+                string buildingProperties = Console.ReadLine(); // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
+                Console.Error.WriteLine(buildingProperties);
+                Building building = ToBuilding(buildingProperties);
+                currentState.buildings[building.id] = building;
+                newBuildingIds.Add(building.id);
+            }
+
+            currentState.resources += resources;
+            currentState.pods = pods;
+            currentState.travelRoutes = travelRoutes;
+
+            // Write an action using Console.WriteLine()
+            // To debug: Console.Error.WriteLine("Debug messages...");
+
+            string actions = currentState.ContrucTubesAndPods(currentState.NewTubes(newBuildingIds));
+            if (actions == "")
+            {
+                Console.WriteLine("WAIT");
+            }
+            else
+            {
+            Console.WriteLine(actions); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
+            }
+        }

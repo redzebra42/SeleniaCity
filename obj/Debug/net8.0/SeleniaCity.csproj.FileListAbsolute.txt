@@ -12,3 +12,4 @@ e:\tristan\git\SeleniaCity\obj\Debug\net8.0\refint\SeleniaCity.dll
 e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.pdb
 E:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.genruntimeconfig.cache
 E:\tristan\git\SeleniaCity\obj\Debug\net8.0\ref\SeleniaCity.dll
+e:\tristan\git\SeleniaCity\obj\Debug\net8.0\SeleniaCity.sourcelink.json

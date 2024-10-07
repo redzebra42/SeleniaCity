@@ -29,7 +29,7 @@ class Player
         static Pod ToPod(string podProperties)
         {
             Pod pod;
-            List<int> properties = new();
+            List<int> properties = [];
             int currValue = 0;
             foreach (char val in podProperties)
             {
@@ -40,9 +40,10 @@ class Player
                 }
                 else
                 {
-                    currValue += val + 10*currValue;
+                    currValue += val - '0' + 10*currValue;
                 }
             }
+            properties.Add(currValue);
             pod.id = properties[0];
             pod.numStops = properties[1];
             int[] stops = new int[pod.numStops];
@@ -68,9 +69,10 @@ class Player
                 }
                 else
                 {
-                    currValue += val + 10*currValue;
+                    currValue += val - '0' + 10*currValue;
                 }
             }
+            properties.Add(currValue);
             building.type = properties[0];
             building.id = properties[1];
             building.X = properties[2];
@@ -108,14 +110,14 @@ class Player
             currentState.routeGraph = [];
             int resources = 3500;
             int numTravelRoutes = 2;
+            currentState.numTravelRoutes = numTravelRoutes;
             TravelRoute[] travelRoutes = new TravelRoute[numTravelRoutes];
             for (int i = 0; i < numTravelRoutes; i++)
             {
                 int buildingId1 = 0;
                 int buildingId2 = 1;
                 int capacity = 3;
-                currentState.routeGraph[buildingId1].Add(buildingId2);
-                currentState.routeGraph[buildingId2].Add(buildingId1);
+                currentState.AddTubeInGraph(buildingId1, buildingId2);
                 TravelRoute travelRoute;
                 travelRoute.capacity = capacity;
                 travelRoute.buildingId1 = buildingId1;
@@ -123,6 +125,7 @@ class Player
             }
 
             int numPods = 1;
+            currentState.numPods = numPods;
             Pod[] pods = new Pod[numPods];
             for (int i = 0; i < numPods; i++)
             {
@@ -131,12 +134,14 @@ class Player
             }
 
             int numNewBuildings = 2;
-            Dictionary<int,Building> buildings = [];
+            currentState.numBuildings += numNewBuildings;
+            List<int> newBuildingIds = [];
             for (int i = 0; i < numNewBuildings; i++)
             {
                 string buildingProperties = "2 3 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
                 Building building = ToBuilding(buildingProperties);
                 currentState.buildings[building.id] = building;
+                newBuildingIds.Add(building.id);
             }
 
             currentState.resources += resources;
@@ -146,10 +151,19 @@ class Player
             // Write an action using Console.WriteLine()
             // To debug: Console.Error.WriteLine("Debug messages...");
 
-
-            Console.WriteLine("TUBE 0 1;TUBE 0 2;POD 42 0 1 0 2 0 1 0 2"); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
+            string actions = currentState.ContrucTubesAndPods(currentState.NewTubes(newBuildingIds));
+            if (actions == "")
+            {
+                Console.WriteLine("WAIT");
+            }
+            else
+            {
+            Console.WriteLine(actions); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
+            }
         }
     }
+
+    
 }
 
 
@@ -222,6 +236,20 @@ public class GameState
         buildings = [];
         pods = new Pod[numPods];
         travelRoutes = new TravelRoute[numTravelRoutes];
+    }
+    
+    public void AddTubeInGraph(int buildingId1, int buildingId2)
+    {
+        if (routeGraph.ContainsKey(buildingId1))
+        {
+            this.routeGraph[buildingId1].Add(buildingId2);
+            this.routeGraph[buildingId2].Add(buildingId1);
+        }
+        else
+        {
+            this.routeGraph[buildingId1] = [buildingId2];
+            this.routeGraph[buildingId2] = [buildingId1];
+        }
     }
 
     public bool CanConstruct(int x1, int y1, int x2, int y2)
