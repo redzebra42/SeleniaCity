@@ -105,6 +105,7 @@ class Player
         // game loop
         while (true)
         {
+            currentState.routeGraph = [];
             int resources = 3500;
             int numTravelRoutes = 2;
             TravelRoute[] travelRoutes = new TravelRoute[numTravelRoutes];
@@ -375,16 +376,21 @@ public class GameState
         return newTubes;
     }
 
-    public string ContrucTubes(List<Pair<int>> tubes)
+    public string ContrucTubesAndPods(List<Pair<int>> tubes)
     {
-        string res = "TUBE ";
+        string res = "";
+        string tubeString = "";
+        string podString = "";
         foreach (Pair<int> tubeIds in tubes)
         {
-            res += tubeIds.X + " " + tubeIds.Y;
+            tubeString = "TUBE " + tubeIds.X + ' '+ tubeIds.Y + ';';
             this.routeGraph[tubeIds.X].Add(tubeIds.Y);
             this.routeGraph[tubeIds.Y].Add(tubeIds.X);
             this.resources -= Distance(tubeIds.X, tubeIds.Y);
+            podString = "POD " + this.numPods++ + ' ' + tubeIds.X + ' '+ tubeIds.Y + ';'; //TODO construct a pod continuing in a longer path
+            this.resources -= 1000;
         }
+        res += tubeString + podString;
         return res;
     }
 
