@@ -134,7 +134,7 @@ class Player
                 pods[i] = ToPod(podProperties);
             }
 
-            int numNewBuildings = 2;
+            int numNewBuildings = 3;
             currentState.numBuildings += numNewBuildings;
             List<int> newBuildingIds = [];
             for (int i = 0; i < numNewBuildings; i++)
@@ -142,15 +142,23 @@ class Player
                 string buildingProperties;
                 if (i == 0)
                 {
-                    buildingProperties = "2 0 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
+                    buildingProperties = "0 0 80 60 30 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2 1 2"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
+                }
+                else if (i == 1)
+                {
+                    buildingProperties = "1 1 40 30";
                 }
                 else
                 {
-                    buildingProperties = "0 1 15 25 4 1 1 2 1";
+                    buildingProperties = "2 2 120 30";
                 }
                 Building building = ToBuilding(buildingProperties);
                 currentState.buildings[building.id] = building;
                 newBuildingIds.Add(building.id);
+                if (building.type == 0)
+                {
+                    currentState.landingPadIds.Add(building.id);
+                }
             }
 
             currentState.resources += resources;
@@ -405,11 +413,11 @@ public class GameState
     public List<Pair<int>> NewTubes() // Modifies the routeGraph with the new tubes (checks every landing pad)
     {
         List<Pair<int>> newTubes = [];
-        foreach (int newBuildingId in this.landingPadIds)
+        foreach (int landingPadId in this.landingPadIds)
         {
-            foreach (int astronautType in this.buildings[newBuildingId].astronauts.Keys)
+            foreach (int astronautType in this.buildings[landingPadId].astronauts.Keys)
             {
-                Pair<int> newTube = new(newBuildingId, DestinationForAstronaut(astronautType, newBuildingId));
+                Pair<int> newTube = new(landingPadId, DestinationForAstronaut(astronautType, landingPadId));
                 newTubes.Add(newTube);
                 this.AddTubeInGraph(newTube.Y, newTube.Y);
             }
@@ -426,18 +434,18 @@ public class GameState
         {
             if (tubeIds.Y != -1)
             {
-            tubeString = "TUBE " + tubeIds.X + ' '+ tubeIds.Y + ';';
-            this.resources -= Distance(tubeIds.X, tubeIds.Y);
-            podString = "POD " + this.numPods++; //TODO construct a pod continuing in a longer path
-            for (int i = 0; i < 20; i++)
-            {
-            podString += " " + tubeIds.X + " " + tubeIds.Y;
+                tubeString = "TUBE " + tubeIds.X + ' '+ tubeIds.Y + ';';
+                this.resources -= Distance(tubeIds.X, tubeIds.Y);
+                podString = "POD " + this.numPods++; //TODO construct a pod continuing in a longer path
+                for (int i = 0; i < 20; i++)
+                {
+                    podString += " " + tubeIds.X + " " + tubeIds.Y;
+                }
+                podString += ';';
+                this.resources -= 1000;
             }
-            podString += ';';
-            this.resources -= 1000;
-            }
+            res += tubeString + podString;
         }
-        res += tubeString + podString;
         return res;
     }
 }
