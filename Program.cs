@@ -109,9 +109,9 @@ class Player
         {
             currentState.routeGraph = [];
             int resources = 3500;
-            int numTravelRoutes = 2;
+            int numTravelRoutes = 1;
             currentState.numTravelRoutes = numTravelRoutes;
-            TravelRoute[] travelRoutes = new TravelRoute[numTravelRoutes];
+            List<TravelRoute> travelRoutes = [];
             for (int i = 0; i < numTravelRoutes; i++)
             {
                 int buildingId1 = 0;
@@ -122,6 +122,7 @@ class Player
                 travelRoute.capacity = capacity;
                 travelRoute.buildingId1 = buildingId1;
                 travelRoute.buildingId2 = buildingId2;
+                travelRoutes.Add(travelRoute);
             }
 
             int numPods = 1;
@@ -138,7 +139,15 @@ class Player
             List<int> newBuildingIds = [];
             for (int i = 0; i < numNewBuildings; i++)
             {
-                string buildingProperties = "2 3 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
+                string buildingProperties;
+                if (i == 0)
+                {
+                    buildingProperties = "2 0 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
+                }
+                else
+                {
+                    buildingProperties = "0 1 15 25 4 1 1 2 1";
+                }
                 Building building = ToBuilding(buildingProperties);
                 currentState.buildings[building.id] = building;
                 newBuildingIds.Add(building.id);
@@ -158,7 +167,7 @@ class Player
             }
             else
             {
-            Console.WriteLine(actions); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
+                Console.WriteLine(actions); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
             }
         }
     }
@@ -220,7 +229,7 @@ public class GameState
     public GameDate date;
     public Dictionary<int,Building> buildings;
     public Pod[] pods;
-    public TravelRoute[] travelRoutes;
+    public List<TravelRoute> travelRoutes;
     public Dictionary<int,List<int>> routeGraph;
     public GameState(int numBuildings, int numPods, int numTravelRoutes)
     {
@@ -235,7 +244,7 @@ public class GameState
         this.date = date;
         buildings = [];
         pods = new Pod[numPods];
-        travelRoutes = new TravelRoute[numTravelRoutes];
+        travelRoutes = [];
     }
     
     public void AddTubeInGraph(int buildingId1, int buildingId2)

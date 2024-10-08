@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SeleniaCity")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1337b3678779357c6aa742518a9f1fad4bd8c812")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d56bb7a46c477abb2a03f0174c612fbf0b45849c")]
 [assembly: System.Reflection.AssemblyProductAttribute("SeleniaCity")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SeleniaCity")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
