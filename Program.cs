@@ -160,7 +160,7 @@ class Player
             // Write an action using Console.WriteLine()
             // To debug: Console.Error.WriteLine("Debug messages...");
 
-            string actions = currentState.ContrucTubesAndPods(currentState.NewTubes(newBuildingIds));
+            string actions = currentState.ContrucTubesAndPods(currentState.NewTubes());
             if (actions == "")
             {
                 Console.WriteLine("WAIT");
@@ -230,6 +230,7 @@ public class GameState
     public Dictionary<int,Building> buildings;
     public Pod[] pods;
     public List<TravelRoute> travelRoutes;
+    public List<int> landingPadIds;
     public Dictionary<int,List<int>> routeGraph;
     public GameState(int numBuildings, int numPods, int numTravelRoutes)
     {
@@ -238,6 +239,7 @@ public class GameState
         this.numPods = numPods;
         this.numTravelRoutes = numTravelRoutes;
         this.routeGraph = [];
+        this.landingPadIds = [];
         GameDate date;
         date.day = 0;
         date.month = 0;
@@ -400,10 +402,10 @@ public class GameState
         return destinationId;
     }
 
-    public List<Pair<int>> NewTubes(List<int> NewBuildingIds) // Modifies the routeGraph with the new tubes
+    public List<Pair<int>> NewTubes() // Modifies the routeGraph with the new tubes (checks every landing pad)
     {
         List<Pair<int>> newTubes = [];
-        foreach (int newBuildingId in NewBuildingIds)
+        foreach (int newBuildingId in this.landingPadIds)
         {
             foreach (int astronautType in this.buildings[newBuildingId].astronauts.Keys)
             {
