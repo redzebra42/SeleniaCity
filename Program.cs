@@ -15,6 +15,8 @@ using System.Runtime.CompilerServices;
 using System.Linq.Expressions;
 using System.Data;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
+using System.ComponentModel.DataAnnotations;
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -27,7 +29,7 @@ class Player
         static Pod ToPod(string podProperties)
         {
             Pod pod;
-            List<int> properties = new();
+            List<int> properties = [];
             int currValue = 0;
             foreach (char val in podProperties)
             {
@@ -38,9 +40,10 @@ class Player
                 }
                 else
                 {
-                    currValue += val + 10*currValue;
+                    currValue += val - '0' + 10*currValue;
                 }
             }
+            properties.Add(currValue);
             pod.id = properties[0];
             pod.numStops = properties[1];
             int[] stops = new int[pod.numStops];
@@ -66,9 +69,10 @@ class Player
                 }
                 else
                 {
-                    currValue += val + 10*currValue;
+                    currValue += val - '0' + 10*currValue;
                 }
             }
+            properties.Add(currValue);
             building.type = properties[0];
             building.id = properties[1];
             building.X = properties[2];
@@ -103,23 +107,26 @@ class Player
         // game loop
         while (true)
         {
+            currentState.routeGraph = [];
             int resources = 3500;
-            int numTravelRoutes = 2;
-            TravelRoute[] travelRoutes = new TravelRoute[numTravelRoutes];
+            int numTravelRoutes = 1;
+            currentState.numTravelRoutes = numTravelRoutes;
+            List<TravelRoute> travelRoutes = [];
             for (int i = 0; i < numTravelRoutes; i++)
             {
                 int buildingId1 = 0;
                 int buildingId2 = 1;
                 int capacity = 3;
-                currentState.routeGraph[buildingId1].Add(buildingId2);
-                currentState.routeGraph[buildingId2].Add(buildingId1);
+                currentState.AddTubeInGraph(buildingId1, buildingId2);
                 TravelRoute travelRoute;
                 travelRoute.capacity = capacity;
                 travelRoute.buildingId1 = buildingId1;
                 travelRoute.buildingId2 = buildingId2;
+                travelRoutes.Add(travelRoute);
             }
 
             int numPods = 1;
+            currentState.numPods = numPods;
             Pod[] pods = new Pod[numPods];
             for (int i = 0; i < numPods; i++)
             {
@@ -128,12 +135,22 @@ class Player
             }
 
             int numNewBuildings = 2;
-            Dictionary<int,Building> buildings = [];
+            currentState.numBuildings += numNewBuildings;
+            List<int> newBuildingIds = [];
             for (int i = 0; i < numNewBuildings; i++)
             {
-                string buildingProperties = "2 3 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
+                string buildingProperties;
+                if (i == 0)
+                {
+                    buildingProperties = "2 0 95 38"; // type buildingId coordX coordY || 0 buildingId coordX coordY numAstronauts astronautType1 astronautType2 ...
+                }
+                else
+                {
+                    buildingProperties = "0 1 15 25 4 1 1 2 1";
+                }
                 Building building = ToBuilding(buildingProperties);
                 currentState.buildings[building.id] = building;
+                newBuildingIds.Add(building.id);
             }
 
             currentState.resources += resources;
@@ -143,10 +160,19 @@ class Player
             // Write an action using Console.WriteLine()
             // To debug: Console.Error.WriteLine("Debug messages...");
 
-
-            Console.WriteLine("TUBE 0 1;TUBE 0 2;POD 42 0 1 0 2 0 1 0 2"); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
+            string actions = currentState.ContrucTubesAndPods(currentState.NewTubes(newBuildingIds));
+            if (actions == "")
+            {
+                Console.WriteLine("WAIT");
+            }
+            else
+            {
+                Console.WriteLine(actions); // TUBE | UPGRADE | TELEPORT | POD | DESTROY | WAIT
+            }
         }
     }
+
+    
 }
 
 
@@ -179,6 +205,12 @@ public struct Coord(int X, int Y)
     public int Y = Y;
 }
 
+public struct Pair<T>(T X, T Y)
+{
+    public T X = X;
+    public T Y = Y;
+}
+
 public class Line(Coord coord1, Coord coord2)
 {
     public Coord coord1 = coord1;
@@ -197,7 +229,7 @@ public class GameState
     public GameDate date;
     public Dictionary<int,Building> buildings;
     public Pod[] pods;
-    public TravelRoute[] travelRoutes;
+    public List<TravelRoute> travelRoutes;
     public Dictionary<int,List<int>> routeGraph;
     public GameState(int numBuildings, int numPods, int numTravelRoutes)
     {
@@ -212,7 +244,21 @@ public class GameState
         this.date = date;
         buildings = [];
         pods = new Pod[numPods];
-        travelRoutes = new TravelRoute[numTravelRoutes];
+        travelRoutes = [];
+    }
+    
+    public void AddTubeInGraph(int buildingId1, int buildingId2)
+    {
+        if (routeGraph.ContainsKey(buildingId1))
+        {
+            this.routeGraph[buildingId1].Add(buildingId2);
+            this.routeGraph[buildingId2].Add(buildingId1);
+        }
+        else
+        {
+            this.routeGraph[buildingId1] = [buildingId2];
+            this.routeGraph[buildingId2] = [buildingId1];
+        }
     }
 
     public bool CanConstruct(int x1, int y1, int x2, int y2)
@@ -244,8 +290,15 @@ public class GameState
         buildingIds.Sort(_Distance);
     }
 
+    public int Distance(int buildingId1, int buildingId2)
+    {
+        return (int)Math.Floor(Math.Pow(Math.Sqrt(this.buildings[buildingId1].X - this.buildings[buildingId2].X) 
+                                      + Math.Sqrt(this.buildings[buildingId1].Y - this.buildings[buildingId2].Y), 2));
+    }
+
     public int GraphDistance(int buildingId1, int buildingId2, List<int> alreadyVisited)
     {
+        bool foundOne = false;
         int _GraphDistance(int fromBuildingId, int toBuildingId)
         {
             //TODO make the distance 0 for teleporters
@@ -262,25 +315,56 @@ public class GameState
                     if (!alreadyVisited.Contains(buildingId))
                     {
                         toVisit.Add(buildingId);
+                        foundOne = true;
                     }
                 }
-                if (toVisit.Count == 0)
+                if (toVisit.Count == 0 || foundOne)
                 {
                     return 10000;
                 }
                 else
                 {
-                    return toVisit.Select(x => 1 + _GraphDistance(x, toBuildingId)).Min();
+                    if (buildings[fromBuildingId].type == 0)
+                    {
+                        return toVisit.Select(x => _GraphDistance(x, toBuildingId)).Min();
+                    }
+                    else
+                    {
+                        return toVisit.Select(x => 1 + _GraphDistance(x, toBuildingId)).Min();
+                    }
                 }
             }
         }
         return _GraphDistance(buildingId1, buildingId2);
     }
 
-    public List<int> TubePath(int astronautType, int fromBuildingId)
+    public bool InConnexGraph(int fromBuildingId, int toBuildingId)
+    {
+        bool res = false;
+        bool _InConnexGraph(int fromBuildingId, int toBuildingId)
+        {
+            List<bool> resList = [];
+            if (!res && fromBuildingId != toBuildingId)
+            {
+                foreach (int buildingId in this.routeGraph[fromBuildingId])
+                {
+                    resList.Add(_InConnexGraph(fromBuildingId, toBuildingId));
+                }
+                return resList.Contains(true);
+            }
+            else
+            {
+                res = true;
+                return true;
+            }
+        }
+        return _InConnexGraph(fromBuildingId, toBuildingId);
+    }
+
+    public int DestinationForAstronaut(int astronautType, int fromBuildingId)
     {
         List<int> rightTypeBuildingIds = [];
-        List<int> path = [fromBuildingId];
+        int destinationId = -1;
         foreach (int toBuildingId in this.buildings.Keys)
         {
             if (this.buildings[toBuildingId].type == astronautType)
@@ -288,19 +372,63 @@ public class GameState
                 rightTypeBuildingIds.Add(toBuildingId);
             }
         }
-        this.DistanceSort(rightTypeBuildingIds, fromBuildingId);
+        //this.DistanceSort(rightTypeBuildingIds, fromBuildingId);
         foreach (int toBuildingId in rightTypeBuildingIds)
         {
             if (CanConstruct(buildings[fromBuildingId].X, buildings[fromBuildingId].Y, buildings[toBuildingId].X, buildings[toBuildingId].Y))
             {
-                path.Add(toBuildingId);
+                destinationId = toBuildingId;
                 break;
             }
         }
-        if (path.Count < 2)
+        if (destinationId == -1)
         {
-            //add the neighbours with the minimum distance from toBuildingId to path and continue...
+            foreach (int toBuildingId in this.buildings.Keys)
+            {
+                if (CanConstruct(buildings[fromBuildingId].X, buildings[fromBuildingId].Y, buildings[toBuildingId].X, buildings[toBuildingId].Y))
+                {
+                    foreach (int toRightTypeBuildingId in rightTypeBuildingIds)
+                    {
+                        if (InConnexGraph(toRightTypeBuildingId, toBuildingId))
+                        {
+                            destinationId = toBuildingId;
+                        }
+                    }
+                }
+            }
         }
-        return path;
+        return destinationId;
+    }
+
+    public List<Pair<int>> NewTubes(List<int> NewBuildingIds) // Modifies the routeGraph with the new tubes
+    {
+        List<Pair<int>> newTubes = [];
+        foreach (int newBuildingId in NewBuildingIds)
+        {
+            foreach (int astronautType in this.buildings[newBuildingId].astronauts.Keys)
+            {
+                Pair<int> newTube = new(newBuildingId, DestinationForAstronaut(astronautType, newBuildingId));
+                newTubes.Add(newTube);
+                this.routeGraph[newTube.X].Add(newTube.Y);
+                this.routeGraph[newTube.Y].Add(newTube.X);
+            }
+        }
+        return newTubes;
+    }
+
+    public string ContrucTubesAndPods(List<Pair<int>> tubes)
+    {
+        string res = "";
+        string tubeString = "";
+        string podString = "";
+        foreach (Pair<int> tubeIds in tubes)
+        {
+            tubeString = "TUBE " + tubeIds.X + ' '+ tubeIds.Y + ';';
+            this.resources -= Distance(tubeIds.X, tubeIds.Y);
+            podString = "POD " + this.numPods++ + ' ' + tubeIds.X + ' '+ tubeIds.Y + ';'; //TODO construct a pod continuing in a longer path
+            this.resources -= 1000;
+        }
+        res += tubeString + podString;
+        return res;
     }
 }

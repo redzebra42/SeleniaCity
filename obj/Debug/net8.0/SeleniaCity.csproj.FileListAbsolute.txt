@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 e:/tristan/git/SeleniaCity/bin/Debug/net8.0/SeleniaCity.exe
 E:/tristan/git/SeleniaCity/bin/Debug/net8.0/SeleniaCity.deps.json
 E:/tristan/git/SeleniaCity/bin/Debug/net8.0/SeleniaCity.runtimeconfig.json
@@ -27,3 +28,6 @@ E:/tristan/git/SeleniaCity/obj/Debug/net8.0/ref/SeleniaCity.dll
 /home/tristan/C#/SeleniaCity/SeleniaCity/obj/Debug/net8.0/SeleniaCity.pdb
 /home/tristan/C#/SeleniaCity/SeleniaCity/obj/Debug/net8.0/SeleniaCity.genruntimeconfig.cache
 /home/tristan/C#/SeleniaCity/SeleniaCity/obj/Debug/net8.0/ref/SeleniaCity.dll
+=======
+e:/tristan/git/SeleniaCity/obj/Debug/net8.0/SeleniaCity.sourcelink.json
+>>>>>>> 1337b3678779357c6aa742518a9f1fad4bd8c812
