@@ -40,7 +40,7 @@ class Player
                 }
                 else
                 {
-                    currValue += val - '0' + 10*currValue;
+                    currValue = val - '0' + 10*currValue;
                 }
             }
             properties.Add(currValue);
@@ -69,7 +69,7 @@ class Player
                 }
                 else
                 {
-                    currValue += val - '0' + 10*currValue;
+                    currValue = val - '0' + 10*currValue;
                 }
             }
             properties.Add(currValue);
@@ -252,11 +252,17 @@ public class GameState
         if (routeGraph.ContainsKey(buildingId1))
         {
             this.routeGraph[buildingId1].Add(buildingId2);
-            this.routeGraph[buildingId2].Add(buildingId1);
         }
         else
         {
             this.routeGraph[buildingId1] = [buildingId2];
+        }
+        if (routeGraph.ContainsKey(buildingId2))
+        {
+            this.routeGraph[buildingId2].Add(buildingId1);
+        }
+        else
+        {
             this.routeGraph[buildingId2] = [buildingId1];
         }
     }
@@ -324,14 +330,8 @@ public class GameState
                 }
                 else
                 {
-                    if (buildings[fromBuildingId].type == 0)
-                    {
-                        return toVisit.Select(x => _GraphDistance(x, toBuildingId)).Min();
-                    }
-                    else
-                    {
-                        return toVisit.Select(x => 1 + _GraphDistance(x, toBuildingId)).Min();
-                    }
+                    //TODO distance 0 for teleporters
+                    return toVisit.Select(x => 1 + _GraphDistance(x, toBuildingId)).Min();
                 }
             }
         }
@@ -409,8 +409,7 @@ public class GameState
             {
                 Pair<int> newTube = new(newBuildingId, DestinationForAstronaut(astronautType, newBuildingId));
                 newTubes.Add(newTube);
-                this.routeGraph[newTube.X].Add(newTube.Y);
-                this.routeGraph[newTube.Y].Add(newTube.X);
+                this.AddTubeInGraph(newTube.Y, newTube.Y);
             }
         }
         return newTubes;
@@ -423,10 +422,18 @@ public class GameState
         string podString = "";
         foreach (Pair<int> tubeIds in tubes)
         {
+            if (tubeIds.Y != -1)
+            {
             tubeString = "TUBE " + tubeIds.X + ' '+ tubeIds.Y + ';';
             this.resources -= Distance(tubeIds.X, tubeIds.Y);
-            podString = "POD " + this.numPods++ + ' ' + tubeIds.X + ' '+ tubeIds.Y + ';'; //TODO construct a pod continuing in a longer path
+            podString = "POD " + this.numPods++; //TODO construct a pod continuing in a longer path
+            for (int i = 0; i < 20; i++)
+            {
+            podString += " " + tubeIds.X + " " + tubeIds.Y;
+            }
+            podString += ';';
             this.resources -= 1000;
+            }
         }
         res += tubeString + podString;
         return res;

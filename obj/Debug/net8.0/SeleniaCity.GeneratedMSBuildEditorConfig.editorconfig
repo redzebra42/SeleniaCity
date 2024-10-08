@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = SeleniaCity
-build_property.ProjectDir = /home/tristan/C#/SeleniaCity/SeleniaCity/
+build_property.ProjectDir = E:\tristan\git\SeleniaCity\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
